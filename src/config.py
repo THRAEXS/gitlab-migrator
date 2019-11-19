@@ -9,7 +9,7 @@ SOURCE = {
 TARGET = {
 	'test': {
 		'address': '10.122.163.77',
-		'access_token': 'wZz7y1hJAzqPxmb_WkJA'
+		'access_token': 'Vax-q2uz7KwsesAmP4sf'
 	},
 	'prod': {
 		'address': '11.11.141.50',
