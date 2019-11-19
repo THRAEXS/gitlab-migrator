@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, requests, json, config
+import os, sys, requests, json, config
 
 class Groups(object):
 	def __init__(self, env = 'test'):
@@ -49,5 +49,9 @@ if __name__ == '__main__':
 		env = env[0]
 	else:
 		env = 'test'
+
+	tmppath = 'tmp'
+	if not os.path.exists(tmppath):
+		os.makedirs(tmppath)
 
 	Groups(env).run()
