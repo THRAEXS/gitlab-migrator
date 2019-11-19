@@ -13,5 +13,5 @@
 ## 用法
 
 ``` sh
-$ python3 src/\<users | groups | groups-members\>.py [test | prod]
+$ python3 src/<users | groups | groups-members>.py [test | prod]
 ```
