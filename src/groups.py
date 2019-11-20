@@ -19,10 +19,9 @@ class Groups(object):
 			headers = { 'PRIVATE-TOKEN': self.source['access_token'] })
 
 		groups = sorted(resp.json(), key = lambda x:x['id'], reverse = False)
+		print('Total groups: %d' % len(groups))
 		with open('tmp/groups.json', 'w', encoding = 'UTF-8') as f:
 			json.dump(groups, f, sort_keys = False, indent = 2, ensure_ascii = False)
-
-		print('Total groups: %d' % len(groups))
 
 		return groups
 

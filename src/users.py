@@ -17,13 +17,12 @@ class Users(object):
 		resp = requests.get(
 			self.api % self.source['address'], 
 			headers = { 'PRIVATE-TOKEN': self.source['access_token'] }, 
-			params = { 'per_page': 50 })
+			params = { 'per_page': 500 })
 
 		users = sorted(resp.json(), key = lambda x:x['id'], reverse = False)
+		print('Total accounts: %d' % len(users))
 		with open('tmp/users.json', 'w', encoding = 'UTF-8') as f:
 			json.dump(users, f, sort_keys = False, indent = 2, ensure_ascii = False)
-
-		print('Total accounts: %d' % len(users))
 
 		return users
 
