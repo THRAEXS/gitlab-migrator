@@ -55,17 +55,24 @@ class Projects(object):
 		print('Total tags: %d' % len(tag_list))
 
 		print('\n---------------------------------------------------')
+		# default: tag.gz
+		resp = requests.get('%s/%d/repository/archive.zip' % 
+			(self.api % self.source['address'], pid), headers = headers)
+		with open('tmp/admin-ui.zip', 'wb') as f:
+			f.write(resp.content)
+
+		print('\n---------------------------------------------------')
 		data = {
 			'name': project['name'],
 			'path': project['path'],
 			'namespace_id': 100
 		}
 
-		c = requests.post(self.api % self.target['address'], 
-			headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
-			data = data)
-		print(c)
-		print(c.json())
+		# c = requests.post(self.api % self.target['address'], 
+		# 	headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
+		# 	data = data)
+		# print(c)
+		# print(c.json())
 
 if __name__ == '__main__':
 	env = sys.argv[1:]
