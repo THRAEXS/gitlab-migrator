@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys, requests, json, config
+from io import BytesIO
 
 class Projects(object):
 	def __init__(self, env = 'test'):
@@ -54,25 +55,35 @@ class Projects(object):
 			headers = headers, params = { 'per_page':  500 }).json()
 		print('Total tags: %d' % len(tag_list))
 
-		print('\n---------------------------------------------------')
-		# default: tag.gz
-		resp = requests.get('%s/%d/repository/archive.zip' % 
-			(self.api % self.source['address'], pid), headers = headers)
-		with open('tmp/admin-ui.zip', 'wb') as f:
-			f.write(resp.content)
-
-		print('\n---------------------------------------------------')
-		data = {
-			'name': project['name'],
-			'path': project['path'],
-			'namespace_id': 100
-		}
+		# print('\n---------------------------------------------------')
+		# data = {
+		# 	'name': project['name'],
+		# 	'path': project['path'],
+		# 	'namespace_id': 100
+		# }
 
 		# c = requests.post(self.api % self.target['address'], 
 		# 	headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
 		# 	data = data)
 		# print(c)
 		# print(c.json())
+
+		print('\n---------------------------------------------------')
+		# default: tar.gz
+		resp = requests.get('%s/%d/repository/archive.tar.gz' % 
+			(self.api % self.source['address'], pid), headers = headers)
+		# with open('tmp/admin-ui.tar.gz', 'wb') as f:
+		# 	f.write(resp.content)
+
+		files = { 'file': ('tmp/admin-ui.tar.gz', BytesIO(resp.content)) }
+		data = {
+			'path': 'admin-ui',
+			'namespace': 'esp'
+		}
+		target_headers = { 'PRIVATE-TOKEN': self.target['access_token'] }
+		rr = requests.post('%s/import' % (self.api % self.target['address']),
+			headers = target_headers, data = data, files = files)
+		print(rr.json())
 
 if __name__ == '__main__':
 	env = sys.argv[1:]
