@@ -30,8 +30,18 @@ def removeUsers():
 			requests.delete('%s/%s' % (url, u['id']), 
 				headers = headers, params = { 'hard_delete': True })
 
+def removeProjects():
+	url = '%s/projects' % address
+	projects = requests.get(url, headers = headers,
+			params = { 'order_by': 'updated_at', 'per_page': 500 }).json()
+	print(len(projects))
+	
+	for p in projects:
+		requests.delete('%s/%s' % (url, p['id']), headers = headers)
+
 # removeGroups()
 # removeUsers()
+removeProjects()
 
 # def remove(ty):
 # 	url = '%s/%s' % (address, ty)

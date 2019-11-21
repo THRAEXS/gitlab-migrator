@@ -2,7 +2,8 @@
 
 SOURCE = {
 	'address': '10.27.213.70',
-	'access_token': 'TEoi3qgzkem7E4Gx4JE1'
+	'access_token': 'TEoi3qgzkem7E4Gx4JE1',
+	'domain': 'gitlab.riped.com'
 	# 'access_token': 'yutBj4yFUJKDdKs7kKxZ'
 }
 
