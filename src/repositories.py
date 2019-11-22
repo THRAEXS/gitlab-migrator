@@ -6,29 +6,39 @@ import os, shutil
 project = 'admin-ui'
 dirpath = 'tmp/repos/%s' % project
 
+def onerror(func, path, exec_info):
+	import stat
+	if not os.access(path, os.W_OK):
+		os.chmod(path, stat.S_IWUSR)
+		func(path)
+	else:
+		raise
+
 if os.path.exists(dirpath):
-	# os.removedirs(dirpath)
-	# os.rmdir(dirpath)
-	# shutil.rmtree(dirpath)
-	shutil.rmtree(dirpath, ignore_errors = True)
+	shutil.rmtree(dirpath, onerror = onerror)
 
-try:
-	url = 'http://10.27.213.70/esp/admin-ui.git'
-	repo = Repo.clone_from(url = url, to_path = dirpath, bare = True)
-	# repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
-except Exception as e:
-	print('WARNING: repository[%s] already exists.' % project)
-	repo = Repo(dirpath)
-
+url = 'http://10.27.213.70/esp/admin-ui.git'
+repo = Repo.clone_from(url = url, to_path = dirpath, bare = False)
+# repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
 print('Repository:', repo)
 
-try:
-	gitlab = repo.create_remote('gitlab', 'http://10.122.163.77/esp/admin-ui.git')
-except Exception as e:
-	print('WARNING: remote gitlab already exists.')
-	gitlab = repo.remotes.gitlab
-
+gitlab = repo.create_remote('gitlab', 'http://10.122.163.77/esp/admin-ui.git')
 print('Remotes:', repo.remotes)
+
+# Create new branch
+git = repo.git
+# print(git.branch.__doc__)
+print(type(git.branch()))
+# print(git.branch())
+print(repo.remotes.origin.refs)
+# <git.RemoteReference "refs/remotes/origin/dev">
+# test = repo.create_head('test1', commit = repo.remotes.origin.refs[1])
+test = repo.create_head('test1', commit = 'origin/dev')
+print(test)
+print(type(test))
+
+# gitlab.push(all = True)
+# gitlab.push(tags = True)
 
 # print((repo.remotes.origin))
 # gl = repo.remotes.gitlab
@@ -40,9 +50,9 @@ print('Remotes:', repo.remotes)
 # print(remote)
 # print(len(remote.refs))
 
-git = repo.git
+# git = repo.git
 # git.checkout('origin/dev', b = 'dev')
-print(git.branch)
+# print(git.branch)
 
 # 循环推送分支
 # for ref in remote.refs:
