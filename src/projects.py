@@ -18,7 +18,7 @@ class Projects(object):
 		users = requests.get(
 			'http://%s/api/v4/users' % self.source['address'], 
 			headers = { 'PRIVATE-TOKEN': self.source['access_token'] }, 
-			params = { 'per_page': 50 }).json()
+			params = { 'per_page': 500 }).json()
 
 		resp = requests.get(
 			self.api % self.source['address'], 

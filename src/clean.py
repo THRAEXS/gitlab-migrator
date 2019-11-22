@@ -21,7 +21,7 @@ def removeGroups():
 def removeUsers():
 	url = '%s/users' % address
 	resp = requests.get(url, headers = headers, 
-		params = { 'per_page': 50 })
+		params = { 'per_page': 500 })
 	users = resp.json()
 	print('Total users: %d' % len(users))
 
@@ -50,7 +50,7 @@ removeProjects()
 # 	print(url)
 # 	print('Total %s: %d' % (ty, len(results)))	
 
-# 	# user ?per_page=50
+# 	# user ?per_page=500
 # 	for it in results:
 # 		url1 = '%s/%s' % (url, it['id'])
 # 		if ty == 'users':
