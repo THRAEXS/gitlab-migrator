@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from git import Repo
-# import os, shutil
+import os, shutil
 
 project = 'admin-ui'
 dirpath = 'tmp/repos/%s' % project
-# if os.path.exists(dirpath):
-# 	os.removedirs(dirpath)
+
+if os.path.exists(dirpath):
+	# os.removedirs(dirpath)
+	# os.rmdir(dirpath)
 	# shutil.rmtree(dirpath)
-	# shutil.rmtree(dirpath, ignore_errors = True)
+	shutil.rmtree(dirpath, ignore_errors = True)
 
 try:
 	url = 'http://10.27.213.70/esp/admin-ui.git'
