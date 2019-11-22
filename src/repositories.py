@@ -3,32 +3,60 @@
 from git import Repo
 # import os, shutil
 
-dirpath = 'tmp/repos/admin-ui'
+project = 'admin-ui'
+dirpath = 'tmp/repos/%s' % project
 # if os.path.exists(dirpath):
 # 	os.removedirs(dirpath)
 	# shutil.rmtree(dirpath)
 	# shutil.rmtree(dirpath, ignore_errors = True)
 
-url = 'http://10.27.213.70/esp/admin-ui.git'
-# repo = Repo.clone_from(url = url, to_path = dirpath)
-# repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
-repo = Repo(dirpath)
+try:
+	url = 'http://10.27.213.70/esp/admin-ui.git'
+	repo = Repo.clone_from(url = url, to_path = dirpath, bare = True)
+	# repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
+except Exception as e:
+	print('WARNING: repository[%s] already exists.' % project)
+	repo = Repo(dirpath)
 
-print(repo)
-print(repo.remotes)
-remote = repo.remotes[0]
-print(type(remote))
-print(remote)
-print(len(remote.refs))
-print(remote.refs)
+print('Repository:', repo)
+
+try:
+	gitlab = repo.create_remote('gitlab', 'http://10.122.163.77/esp/admin-ui.git')
+except Exception as e:
+	print('WARNING: remote gitlab already exists.')
+	gitlab = repo.remotes.gitlab
+
+print('Remotes:', repo.remotes)
+
+# print((repo.remotes.origin))
+# gl = repo.remotes.gitlab
+# print(gl)
+# print(gl.push)
+
+# remote = repo.remotes[0]
+# print(type(remote))
+# print(remote)
+# print(len(remote.refs))
 
 git = repo.git
-for ref in remote.refs:
-	print(type(ref), ref)
-	# git.checkout(ref, b = 'dev')
-	if ref == 'origin/dev':
-		print(1)
-	# print(ref.__doc__)
+# git.checkout('origin/dev', b = 'dev')
+print(git.branch)
+
+# 循环推送分支
+# for ref in remote.refs:
+# 	print(type(ref), ref, ref.name, type(ref.name))
+# 	if ref.name != 'origin/HEAD':
+# 		print('push', ref.name)
+# 		bname = ref.name.replace('origin/', '')
+# 		# git push gitlab dev:dev
+# 		# gl.push(refspec = '{}:{}'.format(bname, bname))
+
+# 		# git push gitlab dev
+# 		gl.push(refspec = bname)
+
+# gl.push(all = True)
+# gl.push(tags = True)
+
 # info = remote.push()[0]
 # print(type(info.flags), info.flags)
 # print(type(info.local_ref), info.local_ref)
