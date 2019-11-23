@@ -3,6 +3,35 @@
 from git import Repo
 import os, shutil
 
+class Repositories(object):
+	def __init__(self, env = 'test'):
+		super(Repositories, self).__init__()
+		self.source = config.SOURCE
+		self.target = config.TARGET.get(env, config.TARGET['test'])
+
+	def run(self):
+		projects = []
+		for project in projects:
+			# uri = '%s.git' % project['path']
+			namespace = project['path']
+			tmppath = 'tmp/repos/%s' % namespace
+			self.clean(tmppath)
+			uri = '%s.git' % namespace
+			self.pull(uri)
+			self.push(uri)
+
+	def pull(self, uri):
+		url = 'http://%s/%s' % (self.source['address'], uri)
+		print('pull url:', url)
+
+	def push(self, uri):
+		url = 'http://%s/%s' % (self.target['address'], uri)
+		print('push url:', url)
+
+	def clean(self, dirpath):
+		if os.path.exists(dirpath):
+			shutil.rmtree(dirpath, onerror = onerror)
+
 project = 'admin-ui'
 dirpath = 'tmp/repos/%s' % project
 
