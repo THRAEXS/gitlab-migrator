@@ -19,7 +19,7 @@ class GroupsMembers(object):
 		target_groups = requests.get(self.api % self.target['address'],
 			headers = headers_target).json()
 		target_users = requests.get(
-			'http://%s/api/v4/users?per_page=50' % self.target['address'],
+			'http://%s/api/v4/users?per_page=500' % self.target['address'],
 			headers = headers_target).json()
 
 		# 获取源gitlab的groups及其下的users
