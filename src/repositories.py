@@ -12,21 +12,32 @@ class Repositories(object):
 	def run(self):
 		projects = []
 		for project in projects:
-			# uri = '%s.git' % project['path']
 			namespace = project['path']
 			tmppath = 'tmp/repos/%s' % namespace
 			self.clean(tmppath)
-			uri = '%s.git' % namespace
-			self.pull(uri)
-			self.push(uri)
+			# uri = '%s.git' % namespace
+			# self.pull(uri)
+			# self.push(uri)
+			self.execute('%s.git' % namespace, tmppath)
 
-	def pull(self, uri):
-		url = 'http://%s/%s' % (self.source['address'], uri)
-		print('pull url:', url)
+	# def pull(self, uri):
+	# 	url = 'http://%s/%s' % (self.source['address'], uri)
+	# 	print('pull url:', url)
 
-	def push(self, uri):
-		url = 'http://%s/%s' % (self.target['address'], uri)
-		print('push url:', url)
+	# def push(self, uri):
+	# 	url = 'http://%s/%s' % (self.target['address'], uri)
+	# 	print('push url:', url)
+
+	def execute(self, uri, to_path):
+		repo = Repo.clone_from(
+			url = 'http://%s/%s.git' % (self.source['address'], uri),
+			to_path = to_path, bare = False)
+
+		gitlab = repo.create_remote('gitlab', 
+			'http://%s/%s.git' % (self.target['address'], uri))
+
+		gitlab.push(all = True)
+		gitlab.push(tags = True)
 
 	def clean(self, dirpath):
 		if os.path.exists(dirpath):
