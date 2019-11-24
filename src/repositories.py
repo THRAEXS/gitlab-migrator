@@ -15,18 +15,7 @@ class Repositories(object):
 			namespace = project['path']
 			tmppath = 'tmp/repos/%s' % namespace
 			self.clean(tmppath)
-			# uri = '%s.git' % namespace
-			# self.pull(uri)
-			# self.push(uri)
 			self.execute('%s.git' % namespace, tmppath)
-
-	# def pull(self, uri):
-	# 	url = 'http://%s/%s' % (self.source['address'], uri)
-	# 	print('pull url:', url)
-
-	# def push(self, uri):
-	# 	url = 'http://%s/%s' % (self.target['address'], uri)
-	# 	print('push url:', url)
 
 	def execute(self, uri, to_path):
 		repo = Repo.clone_from(
@@ -57,25 +46,27 @@ def onerror(func, path, exec_info):
 if os.path.exists(dirpath):
 	shutil.rmtree(dirpath, onerror = onerror)
 
-url = 'http://10.27.213.70/esp/admin-ui.git'
-repo = Repo.clone_from(url = url, to_path = dirpath, bare = False)
-# repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
-print('Repository:', repo)
+# *******************
+# url = 'http://10.27.213.70/esp/admin-ui.git'
+# repo = Repo.clone_from(url = url, to_path = dirpath, bare = False)
+# # repo = Repo.clone_from(url = url, to_path = dirpath, branch = "dev")
+# print('Repository:', repo)
 
-gitlab = repo.create_remote('gitlab', 'http://10.122.163.77/esp/admin-ui.git')
-print('Remotes:', repo.remotes)
+# gitlab = repo.create_remote('gitlab', 'http://10.122.163.77/esp/admin-ui.git')
+# print('Remotes:', repo.remotes)
 
-# Create new branch
-git = repo.git
-# print(git.branch.__doc__)
-print(type(git.branch()))
-# print(git.branch())
-print(repo.remotes.origin.refs)
-# <git.RemoteReference "refs/remotes/origin/dev">
-# test = repo.create_head('test1', commit = repo.remotes.origin.refs[1])
-test = repo.create_head('test1', commit = 'origin/dev')
-print(test)
-print(type(test))
+# # Create new branch
+# git = repo.git
+# # print(git.branch.__doc__)
+# print(type(git.branch()))
+# # print(git.branch())
+# print(repo.remotes.origin.refs)
+# # <git.RemoteReference "refs/remotes/origin/dev">
+# # test = repo.create_head('test1', commit = repo.remotes.origin.refs[1])
+# test = repo.create_head('test1', commit = 'origin/dev')
+# print(test)
+# print(type(test))
+# *******************
 
 # gitlab.push(all = True)
 # gitlab.push(tags = True)
