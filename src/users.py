@@ -28,10 +28,18 @@ class Users(object):
 
 	def inserts(self, users):
 		new_users = []
-		print('Old users size:', len(users))
+		# print('Old users size:', len(users))
 		for user in users:
 			uname = user['username']
-			if uname != 'root' and uname != 'ghost':
+			if uname == 'ghost':
+				continue
+
+			if uname == 'root':
+				resp = requests.get(
+					'%s/1' % (self.api % self.target['address'], ), 
+					headers = self.target['headers'], params = self.params)
+				new_users.append(resp.json())
+			else:
 				data = {
 					'email': user.get('email'),
 					'password': '11111111',
@@ -51,11 +59,13 @@ class Users(object):
 					headers = self.target['headers'], data = data)
 				new_users.append(resp.json())
 
-		print('Create new user: %d' % len(new_users))
+		size = len(new_users)
+		print('Create new user: %d' % (size - 1))
+		print('Total new user: %d' % size)
 
-		resp = requests.get(self.api % self.target['address'], 
-			headers = self.target['headers'], params = self.params)
+		# resp = requests.get(self.api % self.target['address'], 
+		# 	headers = self.target['headers'], params = self.params)
 		
-		print('New user size: ', len(resp.json()))
+		# print('New user size: ', len(resp.json()))
 
-		return resp.json()
+		return new_users

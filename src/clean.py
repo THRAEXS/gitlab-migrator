@@ -46,6 +46,9 @@ class Clean(object):
 		removeUsers()
 		removeProjects()
 
+if __name__ == '__main__':
+	Clean()
+
 # def remove(ty):
 # 	url = '%s/%s' % (address, ty)
 # 	resp = requests.get(url, headers = headers)

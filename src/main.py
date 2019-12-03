@@ -4,6 +4,8 @@ import os, sys, config, base
 from users import Users
 from groups import Groups
 from groups_members import GroupsMembers
+from projects import Projects
+from repositories import Repositories
 
 from clean import Clean
 
@@ -16,6 +18,11 @@ def execute(cfg):
 
 	members = GroupsMembers(cfg, users, groups).run()
 	base.storage('groups-members', members)
+
+	projects = Projects(cfg).run()
+	base.storage('projects', projects)
+
+	Repositories(cfg, projects).run()
 
 if __name__ == '__main__':
 	env = sys.argv[1:]
@@ -40,5 +47,5 @@ if __name__ == '__main__':
 		print(cfg[key])
 	cfg['per_page'] = 500
 
-	Clean()
+	# Clean()
 	execute(cfg)
