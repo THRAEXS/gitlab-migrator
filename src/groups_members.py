@@ -46,7 +46,6 @@ class GroupsMembers(object):
 	def add(self, members):
 		for gm in members:
 			gid = gm['target_id']
-			print(gm['name'], len(gm['members']))
 			for m in gm['members']:
 				data = {
 					'id': gid,

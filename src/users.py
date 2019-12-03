@@ -8,16 +8,13 @@ class Users(object):
 		self.api = 'http://%s/api/v4/users'
 		self.source = cfg['source']
 		self.target = cfg['target']
-		self.params = { 'per_page': cfg['per_page'] }
+		self.params = { 'per_page': cfg['per_page'], 'sort': 'asc' }
 
 	def run(self):
 		source = self.get()
-		self.inserts(source)
+		target = self.inserts(source)
 
-		resp = requests.get(self.api % self.target['address'], 
-			headers = self.target['headers'], params = self.params)
-		
-		return { 'source': source, 'target': resp.json() }
+		return { 'source': source, 'target': target }
 
 	def get(self):
 		resp = requests.get(self.api % self.source['address'], 
@@ -31,6 +28,7 @@ class Users(object):
 
 	def inserts(self, users):
 		new_users = []
+		print('Old users size:', len(users))
 		for user in users:
 			uname = user['username']
 			if uname != 'root' and uname != 'ghost':
@@ -55,4 +53,9 @@ class Users(object):
 
 		print('Create new user: %d' % len(new_users))
 
-		# return new_users
+		resp = requests.get(self.api % self.target['address'], 
+			headers = self.target['headers'], params = self.params)
+		
+		print('New user size: ', len(resp.json()))
+
+		return resp.json()
