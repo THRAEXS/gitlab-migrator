@@ -12,9 +12,12 @@ class Users(object):
 
 	def run(self):
 		source = self.get()
-		target = self.inserts(source)
+		self.inserts(source)
+
+		resp = requests.get(self.api % self.target['address'], 
+			headers = self.target['headers'], params = self.params)
 		
-		return { 'source': source, 'target': target }
+		return { 'source': source, 'target': resp.json() }
 
 	def get(self):
 		resp = requests.get(self.api % self.source['address'], 
@@ -52,4 +55,4 @@ class Users(object):
 
 		print('Create new user: %d' % len(new_users))
 
-		return new_users
+		# return new_users

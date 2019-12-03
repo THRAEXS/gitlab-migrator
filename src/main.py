@@ -14,7 +14,8 @@ def execute(cfg):
 	groups = Groups(cfg).run()
 	base.storage('groups', groups)
 
-	members = GroupsMembers(cfg, users, groups)
+	members = GroupsMembers(cfg, users, groups).run()
+	print(members)
 	base.storage('groups-members', members)
 
 if __name__ == '__main__':
