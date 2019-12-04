@@ -10,8 +10,24 @@
 
 - `TARGET`: 新版本GitLab(`test`/`prod`)地址与访问令牌
 
+## 迁移数据列表
+
+- [X] Users
+- [X] Groups
+- [X] Group members
+- [X] Projects
+- [X] Repositories
+- [ ] Issues
+- [ ] Merge requests
+
 ## 用法
 
+- 迁移
 ``` sh
-$ python3 src/<users | groups | groups-members>.py [test | prod]
+$ python3 src/main.py [test | prod]
+```
+
+- 清除测试目标库中的数据
+``` sh
+$ python3 src/clean.py
 ```
