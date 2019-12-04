@@ -1,99 +1,78 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, requests, json, config
-from io import BytesIO
+import requests
 
 class Projects(object):
-	def __init__(self, env = 'test'):
+	def __init__(self, cfg, target_users, target_groups):
 		super(Projects, self).__init__()
 		self.api = 'http://%s/api/v4/projects'
-		self.source = config.SOURCE
-		self.target = config.TARGET.get(env, config.TARGET['test'])
+		self.source = cfg['source']
+		self.target = cfg['target']
+		self.per_page = cfg['per_page']
+		self.target_users = target_users
+		self.target_groups = target_groups
+
+		# self.users_map = {}
+		# for u in target_users:
+		# 	self.users_map['username'] = u['id']
+
+		# self.group_map = {}
+		# for u in target_users:
+		# 	self.group_map['username'] = u['id']
 
 	def run(self):
-		# self.get()
-		self.mock()
+		source = self.get()
+		target = self.inserts(source)
+		
+		return { 'source': source, 'target': target }
 
 	def get(self):
-		users = requests.get(
-			'http://%s/api/v4/users' % self.source['address'], 
-			headers = { 'PRIVATE-TOKEN': self.source['access_token'] }, 
-			params = { 'per_page': 500 }).json()
-
-		resp = requests.get(
+		projects = requests.get(
 			self.api % self.source['address'], 
-			headers = { 'PRIVATE-TOKEN': self.source['access_token'] },
-			params = { 'order_by': 'updated_at', 'per_page': 500 })
+			headers = self.source['headers'],
+			params = { 'order_by': 'updated_at', 'per_page': self.per_page }).json()
+		
+		print('Total projects:', len(projects))
 
-		projects = resp.json()
-		print(len(projects))
-		with open('tmp/projects.json', 'w', encoding = 'UTF-8') as f:
-			json.dump(projects, f, sort_keys = False, indent = 2, ensure_ascii = False)
+		return projects
 
-	def mock(self):
-		pid = 23
-		headers = { 'PRIVATE-TOKEN': self.source['access_token'] }
+	def inserts(self, projects):
+		new_projects = []
+		for project in projects:
+			npn = project['namespace']['name']
+			try:
+				np = next(x for x in self.target_groups if x['path'] == npn)
 
-		print('---------------------------------------------------')
-		project = requests.get(
-			'%s/%d' % (self.api % self.source['address'], pid), headers = headers).json()
-		print('%s(%s/%s)' % (project['name'], project['path'], project['description']))
+				data = {
+					"name": project['name'],
+					"path": project['path'],
+					"namespace_id": np['id'],
+					"description": project['description'],
+					"visibility": project['visibility'],
+					"lfs_enabled": project['lfs_enabled']
+				}
+				resp = requests.post(
+					self.api % self.target['address'], 
+					headers = self.target['headers'], 
+					data = data)
+				new_projects.append(resp.json())
+			except Exception as e:
+				np = next(x for x in self.target_users if x['username'] == npn)
 
-		print('\n---------------------------------------------------')
-		links = project['_links']
-		print(links['repo_branches'].replace(self.source['domain'], self.source['address']))
-		branches = requests.get(links['repo_branches'] .replace(self.source['domain'], 
-			self.source['address']), headers = headers).json()
+				data = {
+					"name": project['name'],
+					"path": project['path'],
+					"user_id": np['id'],
+					"description": project['description'],
+					"visibility": project['visibility'],
+					"lfs_enabled": project['lfs_enabled']
+				}
+				resp = requests.post(
+					'%s/user/%s' % (self.api % self.target['address'], np['id']), 
+					headers = self.target['headers'], 
+					data = data)
+				new_projects.append(resp.json())
 
-		for b in branches:
-			print('Branch name: %s' % b['name'])
-		print('Total branches: %d' % len(branches))
+		print('Create new project: %d' % len(new_projects))
 
-		print('\n---------------------------------------------------')
-		tag_list = requests.get(
-			'%s/%d/repository/tags' % (self.api % self.source['address'], pid),
-			headers = headers, params = { 'per_page':  500 }).json()
-		print('Total tags: %d' % len(tag_list))
-
-		# print('\n---------------------------------------------------')
-		# data = {
-		# 	'name': project['name'],
-		# 	'path': project['path'],
-		# 	'namespace_id': 100
-		# }
-
-		# c = requests.post(self.api % self.target['address'], 
-		# 	headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
-		# 	data = data)
-		# print(c)
-		# print(c.json())
-
-		print('\n---------------------------------------------------')
-		# default: tar.gz
-		resp = requests.get('%s/%d/repository/archive.tar.gz' % 
-			(self.api % self.source['address'], pid), headers = headers)
-		# with open('tmp/admin-ui.tar.gz', 'wb') as f:
-		# 	f.write(resp.content)
-
-		files = { 'file': ('tmp/admin-ui.tar.gz', BytesIO(resp.content)) }
-		data = {
-			'path': 'admin-ui',
-			'namespace': 'esp'
-		}
-		target_headers = { 'PRIVATE-TOKEN': self.target['access_token'] }
-		rr = requests.post('%s/import' % (self.api % self.target['address']),
-			headers = target_headers, data = data, files = files)
-		print(rr.json())
-
-if __name__ == '__main__':
-	env = sys.argv[1:]
-	if env:
-		env = env[0]
-	else:
-		env = 'test'
-
-	tmppath = 'tmp'
-	if not os.path.exists(tmppath):
-		os.makedirs(tmppath)
-
-	Projects(env).run()
+		return new_projects

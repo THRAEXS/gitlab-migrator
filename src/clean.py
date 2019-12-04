@@ -13,7 +13,7 @@ def removeGroups():
 	url = '%s/groups' % address
 	resp = requests.get(url, headers = headers)
 	groups = resp.json()
-	print('Total groups: %d' % len(groups))
+	print('Remove groups: %d' % len(groups))
 
 	for g in groups:
 		requests.delete('%s/%s' % (url, g['id']), headers = headers)
@@ -23,7 +23,7 @@ def removeUsers():
 	resp = requests.get(url, headers = headers, 
 		params = { 'per_page': 500 })
 	users = resp.json()
-	print('Total users: %d' % len(users))
+	print('Remove users: %d' % len(users))
 
 	for u in users:
 		if u['username'] != 'root':
@@ -34,14 +34,20 @@ def removeProjects():
 	url = '%s/projects' % address
 	projects = requests.get(url, headers = headers,
 			params = { 'order_by': 'updated_at', 'per_page': 500 }).json()
-	print(len(projects))
+	print('Remove projects: %d' % len(projects))
 	
 	for p in projects:
 		requests.delete('%s/%s' % (url, p['id']), headers = headers)
 
-# removeGroups()
-# removeUsers()
-removeProjects()
+class Clean(object):
+	def __init__(self):
+		super(Clean, self).__init__()
+		removeGroups()
+		removeUsers()
+		removeProjects()
+
+if __name__ == '__main__':
+	Clean()
 
 # def remove(ty):
 # 	url = '%s/%s' % (address, ty)

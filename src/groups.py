@@ -1,32 +1,33 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, requests, json, config
+import requests
 
 class Groups(object):
-	def __init__(self, env = 'test'):
+	def __init__(self, cfg):
 		super(Groups, self).__init__()
 		self.api = 'http://%s/api/v4/groups'
-		self.source = config.SOURCE
-		self.target = config.TARGET.get(env, config.TARGET['test'])
-		
+		self.source = cfg['source']
+		self.target = cfg['target']
+
 	def run(self):
-		groups = self.get()
-		self.inserts(groups)
+		source = self.get()
+		target = self.inserts(source)
+		
+		return { 'source': source, 'target': target }
 
 	def get(self):
 		resp = requests.get(
 			self.api % self.source['address'], 
-			headers = { 'PRIVATE-TOKEN': self.source['access_token'] })
+			headers = self.source['headers'])
 
 		groups = sorted(resp.json(), key = lambda x:x['id'], reverse = False)
+
 		print('Total groups: %d' % len(groups))
-		with open('tmp/groups.json', 'w', encoding = 'UTF-8') as f:
-			json.dump(groups, f, sort_keys = False, indent = 2, ensure_ascii = False)
 
 		return groups
 
 	def inserts(self, groups):
-		c = 0
+		new_groups = []
 		for group in groups:
 			data = {
 				"name": group['name'],
@@ -35,22 +36,12 @@ class Groups(object):
 				"visibility": group['visibility'],
 				"lfs_enabled": group['lfs_enabled']
 			}
-			requests.post(
+			resp = requests.post(
 				self.api % self.target['address'], 
 				headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
 				data = data)
-			c += 1
-		print('Create new group: %d' % c)
+			new_groups.append(resp.json())
 
-if __name__ == '__main__':
-	env = sys.argv[1:]
-	if env:
-		env = env[0]
-	else:
-		env = 'test'
+		print('Create new group: %d' % len(new_groups))
 
-	tmppath = 'tmp'
-	if not os.path.exists(tmppath):
-		os.makedirs(tmppath)
-
-	Groups(env).run()
+		return new_groups

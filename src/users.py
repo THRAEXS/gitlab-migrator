@@ -1,36 +1,45 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, requests, json, config
+import requests
 
 class Users(object):
-	def __init__(self, env = 'test'):
+	def __init__(self, cfg):
 		super(Users, self).__init__()
 		self.api = 'http://%s/api/v4/users'
-		self.source = config.SOURCE
-		self.target = config.TARGET.get(env, config.TARGET['test'])
+		self.source = cfg['source']
+		self.target = cfg['target']
+		self.params = { 'per_page': cfg['per_page'], 'sort': 'asc' }
 
 	def run(self):
-		users = self.get()
-		self.inserts(users)
+		source = self.get()
+		target = self.inserts(source)
+
+		return { 'source': source, 'target': target }
 
 	def get(self):
-		resp = requests.get(
-			self.api % self.source['address'], 
-			headers = { 'PRIVATE-TOKEN': self.source['access_token'] }, 
-			params = { 'per_page': 500 })
+		resp = requests.get(self.api % self.source['address'], 
+			headers = self.source['headers'], params = self.params)
 
 		users = sorted(resp.json(), key = lambda x:x['id'], reverse = False)
+
 		print('Total accounts: %d' % len(users))
-		with open('tmp/users.json', 'w', encoding = 'UTF-8') as f:
-			json.dump(users, f, sort_keys = False, indent = 2, ensure_ascii = False)
 
 		return users
 
 	def inserts(self, users):
-		c = 0
+		new_users = []
+		# print('Old users size:', len(users))
 		for user in users:
 			uname = user['username']
-			if uname != 'root' and uname != 'ghost':
+			if uname == 'ghost':
+				continue
+
+			if uname == 'root':
+				resp = requests.get(
+					'%s/1' % (self.api % self.target['address'], ), 
+					headers = self.target['headers'], params = self.params)
+				new_users.append(resp.json())
+			else:
 				data = {
 					'email': user.get('email'),
 					'password': '11111111',
@@ -46,22 +55,17 @@ class Users(object):
 					'admin': user.get('is_admin'),
 					'skip_confirmation': True
 				}
-				requests.post(
-					self.api % self.target['address'], 
-					headers = { 'PRIVATE-TOKEN': self.target['access_token'] }, 
-					data = data)
-				c += 1
-		print('Create new user: %d' % c)
+				resp = requests.post(self.api % self.target['address'], 
+					headers = self.target['headers'], data = data)
+				new_users.append(resp.json())
 
-if __name__ == '__main__':
-	env = sys.argv[1:]
-	if env:
-		env = env[0]
-	else:
-		env = 'test'
+		size = len(new_users)
+		print('Create new user: %d' % (size - 1))
+		print('Total new user: %d' % size)
 
-	tmppath = 'tmp'
-	if not os.path.exists(tmppath):
-		os.makedirs(tmppath)
+		# resp = requests.get(self.api % self.target['address'], 
+		# 	headers = self.target['headers'], params = self.params)
+		
+		# print('New user size: ', len(resp.json()))
 
-	Users(env).run()
+		return new_users
