@@ -7,7 +7,7 @@ from groups_members import GroupsMembers
 from projects import Projects
 from repositories import Repositories
 
-from clean import Clean
+# from clean import Clean
 
 def execute(cfg):
 	users = Users(cfg).run()
@@ -19,10 +19,10 @@ def execute(cfg):
 	members = GroupsMembers(cfg, users, groups).run()
 	base.storage('groups-members', members)
 
-	projects = Projects(cfg).run()
+	projects = Projects(cfg, users['target'], groups['target']).run()
 	base.storage('projects', projects)
 
-	Repositories(cfg, projects).run()
+	Repositories(cfg, projects['source']).run()
 
 if __name__ == '__main__':
 	env = sys.argv[1:]

@@ -4,17 +4,17 @@ from git import Repo
 import os, shutil
 
 class Repositories(object):
-	def __init__(self, cfg, projects):
+	def __init__(self, cfg, source_projects):
 		super(Repositories, self).__init__()
 		self.api = 'http://%s/%s.git'
 		self.source = cfg['source']
 		self.target = cfg['target']
-		self.projects = projects
+		self.source_projects = source_projects
 		self.dirpath = 'tmp/repos/'
 
 	def run(self):
 		self.clean()
-		for project in self.projects:
+		for project in self.source_projects:
 			groupdir = '%s%s' % (self.dirpath, project['namespace']['path'])
 			if not os.path.exists(groupdir):
 				os.makedirs(groupdir)
