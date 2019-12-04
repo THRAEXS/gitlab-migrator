@@ -15,15 +15,18 @@ class Repositories(object):
 	def run(self):
 		self.clean()
 		for project in self.projects:
+			groupdir = '%s%s' % (self.dirpath, project['namespace']['path'])
+			if not os.path.exists(groupdir):
+				os.makedirs(groupdir)
 			self.push(project['path_with_namespace'], 
-				'%s%s' % (self.dirpath, project['name']))
-		# self.push('esp/admin-ui', 
-		# 		'%s%s' % (self.dirpath, 'admin-ui'))
+				'%s/%s' % (groupdir, project['path']))
 
 	def push(self, uri, to_path):
-		source_url = self.api % (self.source['address'], uri)
+		source_url = self.api % ('%s' % self.source['address'], uri)
 		target_url = self.api % (self.target['address'], uri)
-		print('Clone:', source_url, 'Push:', target_url)
+		print('Clone:', source_url)
+		print('Push:', target_url)
+
 		repo = Repo.clone_from(url = source_url, to_path = to_path, bare = True)
 		gitlab = repo.create_remote('gitlab', target_url)
 		gitlab.push(all = True)
